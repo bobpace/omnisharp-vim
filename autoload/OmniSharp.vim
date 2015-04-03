@@ -322,11 +322,12 @@ function! OmniSharp#RunTests(mode) abort
   let b:dispatch = b:buildcommand . ' && ' . s:testcommand
   if executable('sed')
     " don't match on <filename unknown>:0
-    let b:dispatch .= ' | sed "s/:0//"'
+    " convert nunit console runner output to same format as used from xbuild
+    let b:dispatch .= ' | sed -e "s/:0//" -e "s/.*at \(.*\) in \(.*\):\([[:digit:]]\+\)/\2(\3,0): \1/"'
   endif
   let &l:makeprg=b:dispatch
   "errorformat=msbuild,nunit stack trace
-  setlocal errorformat=\ %#%f(%l\\\,%c):\ %m,%m\ in\ %#%f:%l
+  setlocal errorformat=\ %#%f(%l\\\,%c):\ %m
   Make
   let &cmdheight = s:cmdheight
 endfunction
